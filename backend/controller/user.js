@@ -1,61 +1,104 @@
-const con = require('../database/dbConnection');
+const connectToDatabase = require('../database/dbConnection');
+const { ObjectId } = require('mongodb');
 
-// Funções CRUD para usuários
+// Função auxiliar para validar ObjectId
+const isValidObjectId = (id) => {
+    return ObjectId.isValid(id) && (String(new ObjectId(id)) === id);
+};
 
+// Criar um usuário
 exports.createUser = async (userData) => {
     try {
-        const query = 'INSERT INTO usuario SET ?';
-        const [result] = await con.promise().query(query, userData);
-        return result;
+        const db = await connectToDatabase();
+        const result = await db.collection('usuarios').insertOne(userData);
+        
+        // Retorna o usuário criado, incluindo o _id gerado
+        const createdUser = await db.collection('usuarios').findOne({ _id: result.insertedId });
+        return createdUser;
     } catch (error) {
         throw new Error(error.message);
     }
 };
 
+// Obter todos os usuários
 exports.getAllUsers = async () => {
     try {
-        const query = 'SELECT * FROM usuario';
-        const [rows] = await con.promise().query(query);
-        return rows;
+        const db = await connectToDatabase();
+        const users = await db.collection('usuarios').find({}).toArray();
+        return users;
     } catch (error) {
         throw new Error(error.message);
     }
 };
 
+// Obter um usuário por ID
 exports.getUserById = async (userId) => {
     try {
-        const query = 'SELECT * FROM usuario WHERE id_usuario = ?';
-        const [rows] = await con.promise().query(query, [userId]);
-        if (rows.length === 0) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('ID de usuário inválido');
+        }
+
+        const db = await connectToDatabase();
+        const user = await db.collection('usuarios').findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
             throw new Error('Usuário não encontrado');
         }
-        return rows[0];
+        return user;
     } catch (error) {
         throw new Error(error.message);
     }
 };
 
+// Atualizar um usuário por ID
 exports.updateUserById = async (userId, userData) => {
     try {
-        const query = 'UPDATE usuario SET ? WHERE id_usuario = ?';
-        const [result] = await con.promise().query(query, [userData, userId]);
-        if (result.affectedRows === 0) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('ID de usuário inválido');
+        }
+
+        const db = await connectToDatabase();
+        const result = await db.collection('usuarios').updateOne({ _id: new ObjectId(userId) }, { $set: userData });
+
+        if (result.matchedCount === 0) {
             throw new Error('Usuário não encontrado');
         }
-        return { message: 'Usuário atualizado com sucesso' };
+
+        // Retorna o documento atualizado
+        const updatedUser = await db.collection('usuarios').findOne({ _id: new ObjectId(userId) });
+        return updatedUser;
     } catch (error) {
         throw new Error(error.message);
     }
 };
 
+// Excluir um usuário por ID e retornar o usuário excluído
 exports.deleteUserById = async (userId) => {
     try {
-        const query = 'DELETE FROM usuario WHERE id_usuario = ?';
-        const [result] = await con.promise().query(query, [userId]);
-        if (result.affectedRows === 0) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('ID de usuário inválido');
+        }
+
+        const db = await connectToDatabase();
+
+        // Primeiro, encontrar o usuário antes de excluí-lo
+        const user = await db.collection('usuarios').findOne({ _id: new ObjectId(userId) });
+        if (!user) {
             throw new Error('Usuário não encontrado');
         }
-        return { message: 'Usuário excluído com sucesso' };
+
+        // Excluir o usuário
+        const result = await db.collection('usuarios').deleteOne({ _id: new ObjectId(userId) });
+
+        if (result.deletedCount === 0) {
+            throw new Error('Erro ao excluir o usuário');
+        }
+
+        // Retorna o usuário excluído junto com a mensagem de sucesso
+        return {
+            message: 'Usuário excluído com sucesso',
+            deletedUser: user
+        };
     } catch (error) {
         throw new Error(error.message);
     }

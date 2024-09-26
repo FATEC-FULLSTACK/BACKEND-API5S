@@ -1,4 +1,3 @@
-// loginRoute.js
 const express = require('express');
 const router = express.Router();
 const authController = require('../controller/auth');
@@ -7,31 +6,31 @@ router.post("/", async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await authController.login(email, password);
+        console.log('TESTE LOGIN',email,' - ',password);
 
-        // CASO USER FALSO GERA ERRO
+        // Se o usuário não for encontrado ou as credenciais forem inválidas
         if (!user) {
-            return res.status(401).json({ message: 'Credenciais inválidas' });
-        } else {
-            
-            // SALVA INFORMAÇÕES NO COOKIE userLogged
-            req.session.userLogged = {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                admin: user.admin,
-                role: user.role
-            };
-
-            /* console.log(`   
-                            Rotina loginRoute.js verifica atualização dos dados no cookie
-                            id ${req.session.userLogged.id}
-                            user, ${req.session.userLogged.username}
-                            email, ${req.session.userLogged.email}
-                            admin, ${req.session.userLogged.admin}
-                            permissao, ${req.session.userLogged.role}`
-            ) */
+            return res.status(401).json({
+                message: 'Credenciais inválidas. Por favor, verifique seu e-mail e senha.'
+            });
         }
-        res.json(user);
+
+        // Armazena as informações essenciais no cookie da sessão
+        req.session.userLogged = {
+            id: user._id,  // Certifique-se de que é o correto identificador (ObjectId)
+            nome_usuario: user.nome_usuario,
+            email: user.email_usuario
+        };
+
+        // Retorna uma mensagem de sucesso junto com os dados do usuário logado
+        res.status(200).json({
+            message: 'Login realizado com sucesso!',
+            user: {
+                id: user._id,
+                nome_usuario: user.nome_usuario,
+                email: user.email_usuario
+            }
+        });
     } catch (error) {
         console.error('Erro no servidor:', error.message);
         res.status(500).json({ message: 'Erro no servidor' });

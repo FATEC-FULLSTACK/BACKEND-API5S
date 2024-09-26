@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/user');
 
-// Rotas CRUD para usuários
 
+// Criar um novo usuário
 router.post('/', async (req, res) => {
     try {
         const newUser = await userController.createUser(req.body);
@@ -13,6 +13,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Obter todos os usuários
 router.get('/', async (req, res) => {
     try {
         const users = await userController.getAllUsers();
@@ -22,6 +23,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Obter um usuário por ID
 router.get('/:id', async (req, res) => {
     try {
         const user = await userController.getUserById(req.params.id);
@@ -31,8 +33,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Atualizar um usuário por ID
 router.put('/:id', async (req, res) => {
-    console.log('UpdateUser',req.params.id, req.body)
     try {
         const updatedUser = await userController.updateUserById(req.params.id, req.body);
         res.json(updatedUser);
@@ -41,6 +43,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Excluir um usuário por ID
 router.delete('/:id', async (req, res) => {
     try {
         const result = await userController.deleteUserById(req.params.id);

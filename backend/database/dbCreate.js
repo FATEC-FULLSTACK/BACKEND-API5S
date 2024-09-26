@@ -1,52 +1,48 @@
-const mysql = require('mysql2');
-const createTableQueries = require('./dbDefault');
-const initialInserts = require('./dbInsert');
+const { MongoClient } = require('mongodb');
+const initialInserts = require('./dbInsert'); // Dados que populam as coleções
 
-const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "fatec",
-});
+const url = 'mongodb://localhost:27017'; // ENDEREÇO DEFAULT DO BANCO DE DADOS MONGODB
+const dbName = 'api5'; // NOME DO BANCO DE DADOS
 
-con.query("CREATE DATABASE IF NOT EXISTS api4", function (err, result) {
-    if (err) throw err;
+const connectMongoDB = async () => {
+    const client = new MongoClient(url);
 
-    con.query("USE api4", function (err, result) {
-        if (err) {
-            console.error("Erro ao selecionar o banco de dados 'api4':", err);
-            con.end();
-            return;
+    try {
+        // CONECTA AO MONGO DB
+        await client.connect();
+        console.log("Conectado ao MongoDB!");
+
+        // SELECIONA O BANCO DE DADOS
+        const db = client.db(dbName);
+
+        // VERIFICAÇÃO DAS COLEÇÕES EXISTENTES
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map(col => col.name);
+
+        // SE O BANCO EXISTIR (OU SE HOUVER COLEÇÕES), REMOVER E CRIAR DO ZERO
+        if (collectionNames.length > 0) {
+            console.log(`Banco de dados '${dbName}' já existe. Removendo...`);
+            await db.dropDatabase(); // REMOVE O BANCO DE DADOS
+            console.log(`Banco de dados '${dbName}' removido com sucesso.`);
         }
 
-        con.query("SHOW TABLES", function (err, result) {
-            if (err) throw err;
-
-            const tables = result.map(row => row['Tables_in_api4']);
-
-            if (tables.length === 0) {
-                
-                Object.keys(createTableQueries).forEach(table => {
-                    con.query(createTableQueries[table], function (err, result) {
-                        if (err) throw err;
-                        console.log(`Tabela ${table} criada com sucesso`);
-                    });
-                });
-
-                console.log("Estrutura padrão do banco de dados criada");
-
-
-                // AGORA VAMOS POPULAR BANCO
-                Object.keys(initialInserts).forEach(table => {
-                    con.query(initialInserts[table], function (err, result) {
-                        if (err) throw err;
-                        console.log(`Insert ${table} criado com sucesso`);
-                    });
-                });
-                con.end();
-            } else {
-                console.log("O banco de dados 'api4' já possui tabelas");
-                con.end();
+        // INSERIR DADOS NAS COLEÇÕES
+        for (const collectionName of Object.keys(initialInserts)) {
+            const insertData = initialInserts[collectionName];
+            if (insertData.length > 0) {
+                await db.collection(collectionName).insertMany(insertData);
+                console.log(`Dados inseridos na coleção ${collectionName} com sucesso`);
             }
-        });
-    });
-});
+        }
+
+        console.log("Estrutura padrão do banco de dados criada e dados iniciais inseridos");
+    } catch (err) {
+        console.error("Erro ao conectar ou criar banco de dados:", err);
+    } finally {
+        // FECHA A CONEXÃO APÓS O PROCESSO
+        await client.close();
+    }
+};
+
+// FUNÇÃO INICIAL PARA CONECTAR E POPULAR O BANCO
+connectMongoDB();

@@ -1,23 +1,24 @@
-const con = require('../database/dbConnection');
+const connectToDatabase = require('../database/dbConnection');
 
 exports.login = async (email, password) => {
     try {
-        const sql = 'SELECT * FROM usuario WHERE email_usuario = ? AND senha_usuario = ?';
-        const [rows] = await con.promise().query(sql, [email, password]);
-        if (rows.length > 0) {
-            const user = rows[0];
-            return {
-                id: user.id_usuario,
-                login: true,
-                username: user.nome_usuario,
-                email: user.email_usuario,
-                admin: user.admin_usuario,
-                role: user.permissao_usuario
-            };
-        } else {
-            throw new Error('Credenciais inválidas');
+        const db = await connectToDatabase();
+        
+        // AGUARDA USUARIO
+        const user = await db.collection('usuarios').findOne({ email_usuario: email });
+        
+        // SE USUARIO NÃO EXISTIR OU FOR NULO RETORNA NULL
+        if (!user || user.senha_usuario !== password) {
+            return null;
         }
+
+        // RETORNO DOS DADOS
+        return {
+            id: user._id,
+            nome_usuario: user.nome_usuario,
+            email_usuario: user.email_usuario
+        };
     } catch (error) {
-        throw new Error('Erro no servidor: ' + error.message);
+        throw new Error(error.message);
     }
 };

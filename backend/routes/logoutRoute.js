@@ -3,28 +3,34 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
+    // Verifica se existe um usuário logado
+    if (!req.session.userLogged) {
+      return res.status(400).json({ message: 'Nenhum usuário está logado' });
+    }
 
-    console.log('Destroying session:', req.session);
+    console.log('Iniciando o processo de logout, sessão atual:', req.session);
 
+    // Destrói a sessão
     await req.session.destroy((err) => {
       if (err) {
-        console.error('Erro ao destruir sessão:', err.message);
+        console.error('Erro ao destruir a sessão:', err.message);
         return res.status(500).json({ message: 'Erro ao fazer logout' });
       }
 
       console.log('Sessão destruída com sucesso');
 
-      res.cookie('userLogged', '', {
-        expires: new Date(Date.now() - 1000),
-        path: '/',
-        httpOnly: true,
+      // Limpa o cookie 'userLogged' removendo-o do navegador
+      res.clearCookie('userLogged', {
+        path: '/', 
+        httpOnly: true, 
       });
 
-      res.json({ message: 'Logout realizado com sucesso' });
+      // Retorna uma resposta de sucesso ao cliente
+      return res.json({ message: 'Logout realizado com sucesso' });
     });
   } catch (error) {
     console.error('Erro no servidor:', error.message);
-    res.status(500).json({ message: 'Erro no servidor' });
+    return res.status(500).json({ message: 'Erro no servidor' });
   }
 });
 
