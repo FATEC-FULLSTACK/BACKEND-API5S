@@ -4,17 +4,17 @@ exports.login = async (email, password) => {
     try {
         const db = await connectToDatabase();
         
-        // AGUARDA USUARIO
+        // Busca o usuário pelo email
         const user = await db.collection('usuarios').findOne({ email_usuario: email });
         
-        // SE USUARIO NÃO EXISTIR OU FOR NULO RETORNA NULL
+        // Se o usuário não existir ou a senha estiver incorreta, retorna null
         if (!user || user.senha_usuario !== password) {
             return null;
         }
 
-        // RETORNO DOS DADOS
+
         return {
-            id: user._id,
+            _id: user._id,  // Usar _id ao invés de id
             nome_usuario: user.nome_usuario,
             email_usuario: user.email_usuario
         };
