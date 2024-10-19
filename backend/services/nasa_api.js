@@ -9,12 +9,13 @@ const api_url = `https://power.larc.nasa.gov/api/projection/daily/point?`;
 
 
 ---------------------------------------
-*/
 
 const start = "20241001";
 const end = "20241101";
 const latitude = -23.103170;
 const longitude = -45.735627;
+*/
+
 
 const fetchTemp = async (start, end, lat, long) => {
     try {
@@ -22,12 +23,14 @@ const fetchTemp = async (start, end, lat, long) => {
             `${api_url}start=${start}&end=${end}&latitude=${lat}&longitude=${long}&community=ag&parameters=T2M%2CPRECTOTCORR%2CRH2M&header=true&time-standard=utc&model=ensemble&scenario=ssp126`
         );
 
-        console.log(response.data.properties);
+        console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
         return response.data;
     } catch (error) {
-        console.error("Erro na requisição dos dados: ", error);
+        console.error("Erro na requisição dos dados: ", error.message || error);
+        throw error;
     }
 };
 
-
-fetchTemp(start, end, latitude, longitude);
+module.exports = {
+    fetchTemp
+};
