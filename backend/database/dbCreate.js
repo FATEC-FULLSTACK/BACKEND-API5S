@@ -1,11 +1,11 @@
 const { MongoClient } = require('mongodb');
 const initialInserts = require('./dbInsert'); // Dados que populam as coleções
 
-const url = 'mongodb://localhost:27017'; // ENDEREÇO DEFAULT DO BANCO DE DADOS MONGODB
+const uri = "mongodb+srv://fatec:fatec@fullstack.pt0hp.mongodb.net/?retryWrites=true&w=majority&appName=fullstack"; // ENDEREÇO DEFAULT DO BANCO DE DADOS MONGODB
 const dbName = 'api5'; // NOME DO BANCO DE DADOS
 
 const connectMongoDB = async () => {
-    const client = new MongoClient(url);
+    const client = new MongoClient(uri);
 
     try {
         // CONECTA AO MONGO DB

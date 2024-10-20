@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const http = require('http');
 
+
 // Importação das rotas do backend
 const userRoutes = require('./routes/userRoute');
 const pointRoutes = require('./routes/pointRoute');
@@ -17,7 +18,6 @@ const reportRoutes = require('./routes/reportRoute');
 const loginRoutes = require('./routes/loginRoute');
 const logoutRoutes = require('./routes/logoutRoute');
 const cookieRoutes = require('./routes/cookieRoute');
-const nasaRoutes = require('./services.nasa_api');
 
 // Configuração do servidor
 const app = express();
@@ -69,7 +69,6 @@ app.use('/user/:userId/reports', reportRoutes); // Rotas para relatórios
 app.use('/login', loginRoutes);
 app.use('/logout', logoutRoutes);
 app.use('/ck', cookieRoutes);
-app.use('/nasa', nasaRoutes);
 
 // Inicialização do servidor
 server.listen(PORT, () => {
