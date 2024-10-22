@@ -18,6 +18,7 @@ const reportRoutes = require('./routes/reportRoute');
 const loginRoutes = require('./routes/loginRoute');
 const logoutRoutes = require('./routes/logoutRoute');
 const cookieRoutes = require('./routes/cookieRoute');
+const nasaRoute = require('./routes/nasaRoute');
 
 // Configuração do servidor
 const app = express();
@@ -64,6 +65,7 @@ app.use('/user', userRoutes);  // Rotas de usuário [PONTOS E NOTIFICAÇÕES VEM
 app.use('/user/:userId/points', pointRoutes); // Rotas para pontos
 app.use('/user/:userId/points/:pointId/notifications', notificationRoutes); // Rotas para notificações
 app.use('/user/:userId/reports', reportRoutes); // Rotas para relatórios
+app.use('/nsa', nasaRoute)
 
 // Rotas independentes de login, logout e cookies
 app.use('/login', loginRoutes);
