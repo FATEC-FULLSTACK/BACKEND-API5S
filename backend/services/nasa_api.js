@@ -23,7 +23,7 @@ exports.fetchTemp = async (start, end, lat, long) => {
             `${api_url}start=${start}&end=${end}&latitude=${lat}&longitude=${long}&community=ag&parameters=T2M&header=true&time-standard=utc&model=ensemble&scenario=ssp245`
         );
 
-        console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
+        //console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
         return response.data;
     } catch (error) {
         console.error("Erro na requisição dos dados: ", error.message || error);
@@ -37,7 +37,7 @@ exports.fetchHum = async (start, end, lat, long) => {
             `${api_url}start=${start}&end=${end}&latitude=${lat}&longitude=${long}&community=ag&parameters=RH2M&header=true&time-standard=utc&model=ensemble&scenario=ssp245`
         );
 
-        console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
+        //console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
         return response.data;
     } catch (error) {
         console.error("Erro na requisição dos dados: ", error.message || error);
@@ -51,7 +51,7 @@ exports.fetchPrec = async (start, end, lat, long) => {
             `${api_url}start=${start}&end=${end}&latitude=${lat}&longitude=${long}&community=ag&parameters=PRECTOTCORR&header=true&time-standard=utc&model=ensemble&scenario=ssp245`
         );
 
-        console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
+        //console.log(response.data.properties); //TESTES PARA VER NO TERMINAL
         return response.data;
     } catch (error) {
         console.error("Erro na requisição dos dados: ", error.message || error);

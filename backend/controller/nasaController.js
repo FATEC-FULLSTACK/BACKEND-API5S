@@ -215,7 +215,7 @@ exports.getAvgPrecData = async (req, res) => {
 
         // Calculate the average temperature
         const avgPrec = sumPrec / valorPrec.length;
-
+        console.log('Precipitação =>', avgPrec);
         // Send the average temperature as a response
         res.json({
             media: avgPrec.toFixed(2) // Rounded to 2 decimal places
