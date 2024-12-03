@@ -9,7 +9,6 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const http = require('http');
 
-
 // Importação das rotas do backend
 const userRoutes = require('./routes/userRoute');
 const pointRoutes = require('./routes/pointRoute');
@@ -18,7 +17,10 @@ const reportRoutes = require('./routes/reportRoute');
 const loginRoutes = require('./routes/loginRoute');
 const logoutRoutes = require('./routes/logoutRoute');
 const cookieRoutes = require('./routes/cookieRoute');
-const nasaRoute = require('./routes/nasaRoute');
+
+// Importação da função de conexão com o banco de dados
+const connectToDatabase = require('./database/dbConnection');
+const { startMonitoring } = require('./controller/alerts');
 
 // Configuração do servidor
 const app = express();
@@ -65,14 +67,31 @@ app.use('/user', userRoutes);  // Rotas de usuário [PONTOS E NOTIFICAÇÕES VEM
 app.use('/user/:userId/points', pointRoutes); // Rotas para pontos
 app.use('/user/:userId/points/:pointId/notifications', notificationRoutes); // Rotas para notificações
 app.use('/user/:userId/reports', reportRoutes); // Rotas para relatórios
-app.use('/nsa', nasaRoute)
 
 // Rotas independentes de login, logout e cookies
 app.use('/login', loginRoutes);
 app.use('/logout', logoutRoutes);
 app.use('/ck', cookieRoutes);
 
-// Inicialização do servidor
+// Função para iniciar o monitoramento a cada 6 horas
+const scheduleMonitoring = async () => {
+    try {
+        const db = await connectToDatabase();
+        startMonitoring(db); // Chama a função startMonitoring passando o banco de dados
+        console.log('Weather monitoring started successfully.');
+
+        // Intervalo de 6 horas (21,600,000 ms)
+        setInterval(() => {
+            console.log('Running scheduled weather monitoring...');
+            startMonitoring(db); // Executa o monitoramento novamente após 6 horas
+        }, 21600000); // 6 horas em milissegundos
+    } catch (error) {
+        console.error('Error starting weather monitoring:', error);
+    }
+};
+
+// Inicialização do monitoramento e do servidor
 server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
+    scheduleMonitoring(); // Inicia o monitoramento quando o servidor for iniciado
 });
